@@ -27,7 +27,8 @@ import java.io.IOException;
 import java.util.Locale;
 
 public enum GeoHashType implements Writeable {
-    GEOHASH;
+    GEOHASH,
+    QUADKEY;
 
     /**
      * Case-insensitive from string method.

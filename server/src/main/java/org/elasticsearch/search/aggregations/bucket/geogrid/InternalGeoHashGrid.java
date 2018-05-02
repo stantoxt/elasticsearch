@@ -21,6 +21,7 @@ package org.elasticsearch.search.aggregations.bucket.geogrid;
 import org.apache.lucene.util.PriorityQueue;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.geo.QuadKeyHash;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.util.LongObjectPagedHashMap;
@@ -84,6 +85,8 @@ public class InternalGeoHashGrid extends InternalMultiBucketAggregation<Internal
             switch(type) {
                 case GEOHASH:
                     return GeoHashUtils.stringEncode(geohashAsLong);
+                case QUADKEY:
+                    return QuadKeyHash.hashToKey(geohashAsLong);
                 default:
                     throw new IllegalArgumentException();
             }
@@ -94,6 +97,8 @@ public class InternalGeoHashGrid extends InternalMultiBucketAggregation<Internal
             switch(type) {
                 case GEOHASH:
                     return GeoPoint.fromGeohash(geohashAsLong);
+                case QUADKEY:
+                    return QuadKeyHash.bboxFromTileIndex(geohashAsLong);
                 default:
                     throw new IllegalArgumentException();
             }

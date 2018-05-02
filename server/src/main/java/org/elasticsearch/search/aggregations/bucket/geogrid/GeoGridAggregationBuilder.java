@@ -25,6 +25,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.geo.GeoUtils;
+import org.elasticsearch.common.geo.QuadKeyHash;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ObjectParser;
@@ -196,6 +197,13 @@ public class GeoGridAggregationBuilder extends ValuesSourceAggregationBuilder<Va
                     precision = 5;
                 }
                 break;
+            case QUADKEY:
+                if (this.precision != null) {
+                    precision = QuadKeyHash.parsePrecisionString(this.precision);
+                } else {
+                    precision = 5;
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unknown type " + type.toString());
         }
@@ -282,6 +290,9 @@ public class GeoGridAggregationBuilder extends ValuesSourceAggregationBuilder<Va
                     switch (type) {
                         case GEOHASH:
                             values[i] = GeoHashUtils.longEncode(target.getLon(), target.getLat(), precision);
+                            break;
+                        case QUADKEY:
+                            values[i] = QuadKeyHash.geoToHash(target.getLon(), target.getLat(), precision);
                             break;
                         default:
                             throw new IllegalArgumentException();

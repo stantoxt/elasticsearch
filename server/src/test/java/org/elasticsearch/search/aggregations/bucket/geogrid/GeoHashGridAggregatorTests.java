@@ -27,6 +27,7 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.elasticsearch.common.CheckedConsumer;
+import org.elasticsearch.common.geo.QuadKeyHash;
 import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.search.aggregations.Aggregator;
@@ -69,6 +70,14 @@ public class GeoHashGridAggregatorTests extends AggregatorTestCase {
         int precision = randomIntBetween(1, 12);
         testWithSeveralDocs(GeoHashType.GEOHASH, precision, (lng, lat) -> {
             return GeoHashUtils.stringEncode(lng, lat, precision);
+        });
+    }
+
+    public void testMaptileWithSeveralDocs() throws IOException {
+        final int precision = randomIntBetween(0, 26);
+
+        testWithSeveralDocs(GeoHashType.QUADKEY, precision, (lng, lat) -> {
+            return QuadKeyHash.hashToKey(QuadKeyHash.geoToHash(lng, lat, precision));
         });
     }
 
