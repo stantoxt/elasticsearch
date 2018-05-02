@@ -51,6 +51,17 @@ public class GeoHashGridParserTests extends ESTestCase {
         assertNotNull(GeoGridAggregationBuilder.parse("geohash_grid", stParser));
     }
 
+    public void testParseOpenLocationCode() throws Exception {
+        int precision = randomIntBetween(1, 12);
+        XContentParser stParser = createParser(JsonXContent.jsonXContent,
+                "{\"field\":\"my_loc\", \"type\":\"pluscode\", \"precision\":\"" + precision +
+                    "\", \"size\": \"500\", \"shard_size\": \"550\"}");
+        XContentParser.Token token = stParser.nextToken();
+        assertSame(XContentParser.Token.START_OBJECT, token);
+        // can create a factory
+        assertNotNull(GeoGridAggregationBuilder.parse("geohash_grid", stParser));
+    }
+
     public void testParseDistanceUnitPrecision() throws Exception {
         double distance = randomDoubleBetween(10.0, 100.00, true);
         DistanceUnit unit = randomFrom(DistanceUnit.values());

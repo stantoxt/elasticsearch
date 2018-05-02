@@ -25,6 +25,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.geo.GeoUtils;
+import org.elasticsearch.common.geo.PluscodeHash;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ObjectParser;
@@ -196,6 +197,14 @@ public class GeoGridAggregationBuilder extends ValuesSourceAggregationBuilder<Va
                     precision = 5;
                 }
                 break;
+            case PLUSCODE:
+                // default 6 == 0.0025 degrees ~~ 5km at equator
+                if (this.precision != null) {
+                    precision = PluscodeHash.parsePrecisionString(this.precision);
+                } else {
+                    precision = 6;
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unknown type " + type.toString());
         }
@@ -282,6 +291,9 @@ public class GeoGridAggregationBuilder extends ValuesSourceAggregationBuilder<Va
                     switch (type) {
                         case GEOHASH:
                             values[i] = GeoHashUtils.longEncode(target.getLon(), target.getLat(), precision);
+                            break;
+                        case PLUSCODE:
+                            values[i] = PluscodeHash.latLngToPluscodeHash(target.getLon(), target.getLat(), precision);
                             break;
                         default:
                             throw new IllegalArgumentException();

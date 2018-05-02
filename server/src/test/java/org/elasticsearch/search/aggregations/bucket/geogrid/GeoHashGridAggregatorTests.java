@@ -18,6 +18,7 @@
  */
 package org.elasticsearch.search.aggregations.bucket.geogrid;
 
+import com.google.openlocationcode.OpenLocationCode;
 import org.apache.lucene.document.LatLonDocValuesField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -27,6 +28,7 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.elasticsearch.common.CheckedConsumer;
+import org.elasticsearch.common.geo.PluscodeHash;
 import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.search.aggregations.Aggregator;
@@ -69,6 +71,16 @@ public class GeoHashGridAggregatorTests extends AggregatorTestCase {
         int precision = randomIntBetween(1, 12);
         testWithSeveralDocs(GeoHashType.GEOHASH, precision, (lng, lat) -> {
             return GeoHashUtils.stringEncode(lng, lat, precision);
+        });
+    }
+
+    public void testPluscodeWithSeveralDocs() throws IOException {
+        int tmp = randomIntBetween(4, 12);
+        if (tmp < OpenLocationCode.CODE_PRECISION_NORMAL && tmp % 2 == 1) tmp++;
+        final int precision = tmp;
+
+        testWithSeveralDocs(GeoHashType.PLUSCODE, precision, (lng, lat) -> {
+            return PluscodeHash.latLngToPluscode(lng, lat, precision);
         });
     }
 
